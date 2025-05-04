@@ -25,8 +25,6 @@ main();
 
 async function main() {
     const client = await connectToDatabase();
-    const database = client.db(mongodb_database);
-    const userCollection = database.collection("users");
 
     configureSessions(client);
 
@@ -35,8 +33,7 @@ async function main() {
     app.use(express.json());
     app.use(express.static(__dirname + "/public"));
 
-    // Register routes
-    registerRoutes(app, userCollection);
+    registerRoutes(client);
 
     app.use((req, res) => {
         res.status(404).send("Page not found - 404");
@@ -76,7 +73,10 @@ function configureSessions(client) {
     );
 }
 
-function registerRoutes(app, userCollection) {
+function registerRoutes(client) {
+    const database = client.db(mongodb_database);
+    const userCollection = database.collection("users");
+
     app.get("/", (req, res) => {
         res.render("index", {
             authenticated: req.session.authenticated || false,
