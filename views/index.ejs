@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Home</title>
+        <link rel="stylesheet" href="/styles.css" />
+    </head>
+    <body>
+        <% if (authenticated) { %>
+        <h2>Hello, <%= username %></h2>
+        <button onclick="location.href='/members'">Go to members area</button><br />
+        <button onclick="location.href='/login'">Logout</button>
+        <% } else { %>
+        <h2>Welcome</h2>
+        <button onclick="location.href='/signup'">Sign Up</button><br />
+        <button onclick="location.href='/login'">Login</button>
+        <% } %>
+    </body>
+</html>
