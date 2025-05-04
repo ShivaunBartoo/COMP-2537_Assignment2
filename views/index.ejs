@@ -4,17 +4,21 @@
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>Home</title>
-        <link rel="stylesheet" href="/styles.css" />
+        <link rel="stylesheet" href="/css/styles.css" />
     </head>
     <body>
         <% if (authenticated) { %>
         <h2>Hello, <%= username %></h2>
-        <button onclick="location.href='/members'">Go to members area</button><br />
-        <button onclick="location.href='/login'">Logout</button>
+        <div class="button-container">
+            <a href="/members" class="button">Members</a><br />
+            <a href="/logout" class="button">Logout</a>
+        </div>
         <% } else { %>
         <h2>Welcome</h2>
-        <button onclick="location.href='/signup'">Sign Up</button><br />
-        <button onclick="location.href='/login'">Login</button>
+        <div class="button-container">
+            <a href="/signup" class="button">Sign Up</a><br />
+            <a href="/login" class="button">Login</a>
+        </div>
         <% } %>
     </body>
 </html>
