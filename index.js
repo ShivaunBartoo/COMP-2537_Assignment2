@@ -3,9 +3,11 @@ const express = require("express");
 const session = require("express-session");
 const MongoStore = require("connect-mongo");
 const MongoClient = require("mongodb").MongoClient;
+const { ObjectId } = require("mongodb");
 const bcrypt = require("bcrypt");
 const joi = require("joi");
 const fs = require("fs");
+const { log } = require("console");
 
 const saltRounds = 12;
 const expireTime = 60 * 60 * 1000; // 1 hour
@@ -40,7 +42,7 @@ async function main() {
     });
 
     app.listen(port, () => {
-        console.log(`Node application listening on port ${port}`);
+        console.log(`Node application listening on port http://localhost:${port}`);
     });
 }
 
@@ -71,20 +73,32 @@ function configureSessions(client) {
             },
         })
     );
+
+    app.use((req, res, next) => {
+        res.locals.session = req.session;
+        next();
+    });
 }
+
+
 
 function registerRoutes(client) {
     const database = client.db(mongodb_database);
     const userCollection = database.collection("users");
 
     app.get("/", (req, res) => {
-        res.render("index", {
-            authenticated: req.session.authenticated || false,
-            username: req.session.username,
+        res.render("main", {
+            body: "partials/index",
         });
     });
 
-    app.get("/signup", (req, res) => res.render("signup"));
+    app.get("/signup", (req, res) => {
+        res.render("main", {
+            title: "Create an Account",
+            body: "partials/signup",
+            shortPage: true,
+        });
+    });
 
     app.post("/signupSubmit", async (req, res) => {
         const schema = joi.object({
@@ -109,6 +123,7 @@ function registerRoutes(client) {
                 username: req.body.username,
                 email: req.body.email,
                 password: hashedPassword,
+                user_type: 'user',
             });
             req.session.username = req.body.username;
             req.session.authenticated = true;
@@ -116,7 +131,13 @@ function registerRoutes(client) {
         res.json(response);
     });
 
-    app.get("/login", (req, res) => res.render("login"));
+    app.get("/login", (req, res) => {
+        res.render("main", {
+            title: "Log In",
+            body: "partials/login",
+            shortPage: true,
+        });
+    });
 
     app.post("/loginSubmit", async (req, res) => {
         const schema = joi.object({
@@ -142,6 +163,7 @@ function registerRoutes(client) {
         }
         req.session.username = user.username;
         req.session.authenticated = true;
+        req.session.user_type = user.user_type;
         res.status(200).json({ status: "ok" });
     });
 
@@ -152,22 +174,53 @@ function registerRoutes(client) {
 
     app.get("/members", (req, res) => {
         if (req.session.authenticated) {
-            res.render("members", { username: req.session.username });
+            res.render("main", {
+                title: `Hello, ${req.session.username}`,
+                body: "partials/members",
+            });
         } else {
             res.redirect("/");
         }
     });
 
-    app.get("/cat", (req, res) => {
-        const directoryPath = __dirname + "/public/img";
-
-        const files = fs.readdirSync(directoryPath);
-        if (files.length === 0) {
-            return res.status(404).send("No images found.");
+    app.get("/admin", async (req, res) => {
+        if (req.session.authenticated) {
+            if(req.session.user_type == "admin"){
+                const users = await userCollection.find().toArray();
+                res.render("main", {
+                title: "Admin Panel",
+                body: "partials/admin",
+                users: users,
+            });
+            }
+            else{
+                res.status(403).render("main", {
+                title: "Admin Panel",
+                body: "partials/admin",
+            });
+            }
+        } else {
+            res.redirect("/");
         }
-        const randomFile = files[Math.floor(Math.random() * files.length)];
-        const filePath = `/img/${randomFile}`;
-        console.log(filePath);
-        res.send(filePath);
     });
+
+    app.post("/userStatus", async (req, res) => {
+        const {id, user_type } = req.body;
+        if(id && user_type){
+            if(!(user_type == "user" || user_type == "admin")){
+                res.status(400).send("Bad Request: Invalid user_type.");
+            }
+            const objectID = new ObjectId(id)
+            const user = await userCollection.findOne({_id: objectID});
+            if (user) {
+                await userCollection.updateOne({_id: objectID}, {$set: {user_type}});
+                res.status(200).send();
+            } else {
+                res.status(400).send("Bad Request: Invalid user id.");
+            }
+        }
+        else{
+            res.status(400).send("Bad Request: Missing 'id' or 'user_type' in the request body.");
+        }
+    })
 }

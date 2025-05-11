@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Assignment 2</title>
+    <link rel="stylesheet" href="/css/output.css" />
+    <%if(typeof scripts !=='undefined' && Array.isArray(scripts)) { for(let script of scripts) { %>
+        <script src="/js/<%-script%>" defer></script>
+        <% } }%>
+</head>
+
+<body class="bg-slate-800 flex flex-col h-full">
+    <!-- Header -->
+    <header class="bg-slate-800 p-4 h-24 flex justify-between items-center mx-8">
+        <div class="flex gap-4">
+            <a class="text-indigo-200 hover:text-indigo-300 text-lg font-bold" href="/">Home</a>
+            <% if (typeof session.authenticated != "undefined" && session.authenticated) { %>
+                <a class="text-indigo-200 hover:text-indigo-300 text-lg font-bold" href="/members">Members</a>
+            <% } %>
+            <% if (typeof session.user_type != "undefined" && session.user_type == "admin") { %>
+                <a class="text-indigo-200 hover:text-indigo-300 text-lg font-bold" href="/admin">Admin</a>
+            <% } %>
+        </div>
+            <% if (typeof session.authenticated != "undefined" && session.authenticated) { %>
+            <a href="/logout"
+                class="w-20 h-8 bg-indigo-300 text-slate-900 hover:bg-indigo-400 hover:cursor-pointer font-black flex items-center justify-center rounded-lg">
+                Log Out
+            </a>
+        <% } else { %>
+            <a href="/login"
+                class="w-20 h-8 bg-indigo-300 text-slate-900  hover:bg-indigo-400 font-bold hover:cursor-pointer font-black flex items-center justify-center rounded-lg">
+                Log In
+            </a>
+        <% } %>
+
+    </header>
+
+    <!-- Main Content -->
+
+    <main class="flex flex-grow flex-col justify-start items-center w-full p-8 pt-0">
+        <hr class="border-gray-500 border w-full mb-8 mt-0">
+        <% if (typeof title !="undefined" ) { %>
+            <div class="text-5xl font-bold text-gray-100 self-start pb-8">
+                <%= title %>
+            </div>
+            <% } %>
+                <div class="w-full bg-slate-200 p-4 <%= (typeof shortPage != "undefined" && shortPage) ? '' : 'flex-grow'%> rounded-md">
+                    <%- include(body) %>
+                </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-slate-700 text-gray-400 p-4 h-12 w-full flex justify-center items-center">
+        <p>© 2025. A COMP-2537 Assignment by Shivaun Bartoo</p>
+    </footer>
+</body>
+
+</html>

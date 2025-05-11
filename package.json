@@ -4,16 +4,20 @@
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
-    "dev": "nodemon index.js"
+    "dev": "nodemon index.js",
+    "build:css": "npx tailwindcss -i ./public/css/input.css -o ./public/css/output.css --watch"
+
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "description": "",
   "devDependencies": {
-    "nodemon": "^3.1.10"
+    "nodemon": "^3.1.10",
+    "prettier-plugin-tailwindcss": "^0.6.11"
   },
   "dependencies": {
+    "@tailwindcss/cli": "^4.1.6",
     "bcrypt": "^5.1.1",
     "connect-mongo": "^5.1.0",
     "dotenv": "^16.5.0",
@@ -21,6 +25,7 @@
     "express": "^5.1.0",
     "express-session": "^1.18.1",
     "joi": "^17.13.3",
-    "mongodb": "^6.16.0"
+    "mongodb": "^6.16.0",
+    "tailwindcss": "^4.1.6"
   }
 }
