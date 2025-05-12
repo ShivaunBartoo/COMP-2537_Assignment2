@@ -38,7 +38,9 @@ async function main() {
     registerRoutes(client);
 
     app.use((req, res) => {
-        res.status(404).send("Page not found - 404");
+        res.status(404).render("main", {
+            body: "partials/404",
+        });
     });
 
     app.listen(port, () => {
