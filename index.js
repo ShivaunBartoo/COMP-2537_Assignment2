@@ -200,7 +200,7 @@ function registerRoutes(client) {
             });
             }
         } else {
-            res.redirect("/");
+            res.redirect("/login");
         }
     });
 
